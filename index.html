@@ -35,7 +35,8 @@
         <b><p>The backtracking algorithm.</p></b>
         <p>Here is the algorithm (in pseudocode) for doing backtracking from a given node n:</p>
        
-        <p style="color:maroon; font-size:20px; margin:20px">boolean solve(Node n) {
+      <p style="color:maroon; font-size:20px; margin:10px">
+        <pre>boolean solve(Node n) {
             <br>
             if n is a leaf node {
                 <br>
@@ -53,8 +54,9 @@
                 <br>
                 return false <br>
             }<br>
-        }
-    </p> 
+        }</pre>
+        </p>
+    </p>   
     <p>Notice that the algorithm is expressed as a boolean function. This is essential to understanding the algorithm. If solve(n) is true, that means node n is part of a solution--that is, node n is one of the nodes on a path from the root to some goal node. We say that n is solvable. If solve(n) is false, then there is no path that includes n to any goal node.</p>
     <p>How does this work?</p>   
 
@@ -79,8 +81,8 @@
     </ol>
     <b><p>Non-recursive backtracking, using a stack</p></b>
     <p>Backtracking is a rather typical recursive algorithm, and any recursive algorithm can be rewritten as a stack algorithm. In fact, that is how your recursive algorithms are translated into machine or assembly language.</p>
-    <p style="color:maroon; font-size:20px; margin:20px">
-        boolean solve(Node n) {<br>
+    <p style="color:maroon; font-size:20px; margin:10px">
+       <pre>boolean solve(Node n) {<br>
             put node n on the stack;<br>
             while the stack is not empty {
                 if the node at the top of the stack is a leaf {<br>
@@ -93,12 +95,13 @@
             }<br>
             return false<br>
         }
+        </pre>
     </p>
     <p>Starting from the root, the only nodes that can be pushed onto the stack are the children of the node currently on the top of the stack, and these are only pushed on one child at a time; hence, the nodes on the stack at all times describe a valid path in the tree. Nodes are removed from the stack only when it is known that they have no goal nodes among their descendents. Therefore, if the root node gets removed (making the stack empty), there must have been no goal nodes at all, and no solution to the problem.</p>
     <p>When the stack algorithm terminates successfully, the nodes on the stack form (in reverse order) a path from the root to a goal node.</p>
     <p>Similarly, when the recursive algorithm finds a goal node, the path information is embodied (in reverse order) in the sequence of recursive calls. Thus as the recursion unwinds, the path can be recovered one node at a time, by (for instance) printing the node at the current level, or storing it in an array.</p>
     <p>Here is the recursive backtracking algorithm, modified slightly to print (in reverse order) the nodes along the successful path:</p>
-    <p style="color:maroon; font-size:20px; margin:20px">
+  <pre>  <p style="color:maroon; font-size:15px; line-height:8px; overflow: auto;">
     boolean solve(Node n) {<br>
         if n is a leaf node {<br>
             if the leaf is a goal node {<br>
@@ -115,7 +118,7 @@
             }<br>
             return false<br>
         }<br>
-    }
+    }</pre>
 </p> 
 <b><p>Keeping backtracking simple</p></b>
 <p>All of these versions of the backtracking algorithm are pretty simple, but when applied to a real problem, they can get pretty cluttered up with details. Even determining whether the node is a leaf can be complex: for example, if the path represents a series of moves in a chess endgame problem, the leaves are the checkmate and stalemate solutions.</p>
@@ -166,14 +169,14 @@
     }
 </p>
 <p>And finally, here's the recursive backtracking routine to "solve" the binary tree by finding a goal node.</p>
-<p style="color:maroon; font-size:20px; margin:20px">
-    static boolean solvable(BinaryTree node) { <br>
+<pre><p style="color:maroon; font-size:15px; margin:0px">
+   static boolean solvable(BinaryTree node) { <br>
        <span>> /* 1 */</span>  if (node == null) return false;<br>
        <span class="one">/* 2 */</span>  if (node.isGoalNode) return true;<br>
         <span class="one">/* 3 */ </span> if (solvable(node.leftChild)) return true;<br>
      <span class="one">/* 4 */</span>  if (solvable(node.rightChild)) return true;<br>
         <span class="one"> /* 5 */</span>  return false;<br>
-        }
+        }</pre>
 </p>
 <p>Here's what the numbered lines are doing:</p>
 <ol>
@@ -185,12 +188,13 @@
 </ol>
 <p>This program runs correctly and produces the unenlightening result true.</p>
 <p>Each time we ask for another node, we have to check if it is null. In the above we put that check as the first thing in solvable. An alternative would be to check first whether each child exists, and recur only if they do. Here's that alternative version:</p>
-<p style="color:maroon; font-size:20px; margin:20px">
-    static boolean solvable(BinaryTree node) {<br>
+<pre><p style="color:maroon; font-size:15px;">
+   static boolean solvable(BinaryTree node) {<br>
         if (node.isGoalNode) return true;<br>
-        if (node.leftChild != null && solvable(node.leftChild)) return true;<br>        if (node.rightChild != null && solvable(node.rightChild)) return true;
-        return false;<br>
-    }
+        if (node.leftChild != null && solvable(node.leftChild)) return true;<br>        
+        if (node.rightChild != null && solvable(node.rightChild)) return true;
+    <br>    return false;<br>
+    }</pre>
 </p>
 <p>I think the first version is simpler, but the second version is slightly more efficient.</p>
 <b><p>What are the children?</p></b>
