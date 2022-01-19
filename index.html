@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HTML Project</title>
+</head>
+<body>
+    <h1>Backtracking</h1>
+    <p>Copyright 2002 by David Matuszek</p>
+    <p>Backtracking is a form of recursion.</p>
+
+        <p>The usual scenario is that you are faced with a number of options, and you must choose one of these. After you make your choice you will get a new set of options; just what set of options you get depends on what choice you made. This procedure is repeated over and over until you reach a final state. If you made a good sequence of choices, your final state is a goal state; if you didn't, it isn't.
+        
+        <p>Conceptually, you start at the root of a tree; the tree probably has some good leaves and some bad leaves, though it may be that the leaves are all good or all bad. You want to get to a good leaf. At each node, beginning with the root, you choose one of its children to move to, and you keep this up until you get to a leaf.
+        
+        <p>Suppose you get to a bad leaf. You can backtrack to continue the search for a good leaf by revoking your most recent choice, and trying out the next option in that set of options. If you run out of options, revoke the choice that got you here, and try another choice at that node. If you end up at the root with no options left, there are no good leaves to be found.
+        
+        <p>This needs an example.</p>
+
+        <center><img src="https://www.cis.upenn.edu/~matuszek/cit594-2012/Pages/backtracking_files/treesearch.gif"></center>
+        <ol>
+            <li>Starting at Root, your options are A and B. You choose A.</li>
+            <li>At A, your options are C and D. You choose C.</li>
+            <li>C is bad. Go back to A.</li>
+            <li>At A, you have already tried C, and it failed. Try D.</li>
+            <li>D is bad. Go back to A.</li>
+            <li>At A, you have no options left to try. Go back to Root.</li>
+            <li>At Root, you have already tried A. Try B.</li>
+            <li>At B, your options are E and F. Try E.</li>
+            <li>E is good. Congratulations!</li>
+        </ol>
+        <p>In this example we drew a picture of a tree. The tree is an abstract model of the possible sequences of choices we could make. There is also a data structure called a tree, but usually we don't have a data structure to tell us what choices we have. (If we do have an actual tree data structure, backtracking on it is called depth-first tree searching.)</p>
+        <b><p>The backtracking algorithm.</p></b>
+        <p>Here is the algorithm (in pseudocode) for doing backtracking from a given node n:</p>
+       
+        <p style="color:maroon; font-size:20px; margin:20px">boolean solve(Node n) {
+            <br>
+            if n is a leaf node {
+                <br>
+                if the leaf is a goal node, return true
+                <br>
+                else return false
+                <br>
+            } else {
+                <br>
+                for each child c of n {
+                    <br>
+                    if solve(c) succeeds, return true
+                <br>
+                }
+                <br>
+                return false <br>
+            }<br>
+        }
+    </p> 
+    <p>Notice that the algorithm is expressed as a boolean function. This is essential to understanding the algorithm. If solve(n) is true, that means node n is part of a solution--that is, node n is one of the nodes on a path from the root to some goal node. We say that n is solvable. If solve(n) is false, then there is no path that includes n to any goal node.</p>
+    <p>How does this work?</p>   
+
+    <ul>
+        <li>If any child of n is solvable, then n is solvable.</li>
+        <li>If no child of n is solvable, then n is not solvable.</li>
+       </ul>
+        <p>Hence, to decide whether any non-leaf node n is solvable (part of a path to a goal node), all you have to do is test whether any child of n is solvable. This is done recursively, on each child of n. In the above code, this is done by the lines</p>
+        <p style="color:maroon; font-size:20px; margin:20px">
+        for each child c of n {<br>
+            if solve(c) succeeds, return true<br>
+        }<br>
+        return false
+    </p>
+    <p>The backtracking algorithm is simple but important. You should understand it thoroughly. Another way of stating it is as follows:</p>
+    <ul>
+    <li>To search a tree:</li>
+    </ul>
+    <ol>
+    <li>If the tree consists of a single leaf, test whether it is a goal node,</li>
+    <li>Otherwise, search the subtrees until you find one containing a goal node, or until you have searched them all unsuccessfully.</li>
+    </ol>
+    <b><p>Non-recursive backtracking, using a stack</p></b>
+    <p>Backtracking is a rather typical recursive algorithm, and any recursive algorithm can be rewritten as a stack algorithm. In fact, that is how your recursive algorithms are translated into machine or assembly language.</p>
+    <p style="color:maroon; font-size:20px; margin:20px">
+        boolean solve(Node n) {<br>
+            put node n on the stack;<br>
+            while the stack is not empty {
+                if the node at the top of the stack is a leaf {<br>
+                    if it is a goal node, return true<br>
+                    else pop it off the stack<br>
+                }<br>
+                else {<br>
+                    if the node at the top of the stack has untried children<br>                       push the next untried child onto the stack
+                    else pop the node off the stack<br>
+            }<br>
+            return false<br>
+        }
+    </p>
+    <p>Starting from the root, the only nodes that can be pushed onto the stack are the children of the node currently on the top of the stack, and these are only pushed on one child at a time; hence, the nodes on the stack at all times describe a valid path in the tree. Nodes are removed from the stack only when it is known that they have no goal nodes among their descendents. Therefore, if the root node gets removed (making the stack empty), there must have been no goal nodes at all, and no solution to the problem.</p>
+    <p>When the stack algorithm terminates successfully, the nodes on the stack form (in reverse order) a path from the root to a goal node.</p>
+    <p>Similarly, when the recursive algorithm finds a goal node, the path information is embodied (in reverse order) in the sequence of recursive calls. Thus as the recursion unwinds, the path can be recovered one node at a time, by (for instance) printing the node at the current level, or storing it in an array.</p>
+    <p>Here is the recursive backtracking algorithm, modified slightly to print (in reverse order) the nodes along the successful path:</p>
+    <p style="color:maroon; font-size:20px; margin:20px">
+    boolean solve(Node n) {<br>
+        if n is a leaf node {<br>
+            if the leaf is a goal node {<br>
+               print n<br>
+               return true<br>
+            }<br>
+            else return false<br>
+        } else {<br>
+            for each child c of n {<br>
+                if solve(c) succeeds {<br>
+                    print n<br>
+                    return true<br>
+                }<br>
+            }<br>
+            return false<br>
+        }<br>
+    }
+</p> 
+<b><p>Keeping backtracking simple</p></b>
+<p>All of these versions of the backtracking algorithm are pretty simple, but when applied to a real problem, they can get pretty cluttered up with details. Even determining whether the node is a leaf can be complex: for example, if the path represents a series of moves in a chess endgame problem, the leaves are the checkmate and stalemate solutions.</p>
+<p>Lorem ipsum dolor sit, amet consectetur adipisicing elit. Maiores est quidem, debitis consequatur veniam sint!</p>
+<p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Deleniti nesciunt provident similique, laboriosam voluptas nostrum repudiandae ratione ut quas consequuntur! Rerum atque eligendi est alias voluptatum similique debitis nostrum sequi?</p>
+<p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Quaerat, nemo officiis id pariatur explicabo eligendi?</p>
+<p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Vitae, accusamus.</p>
+<p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Libero suscipit hic eius corrupti eos voluptatibus neque asperiores illo aliquam. Dolores alias asperiores neque accusamus cumque.</p>
+<p>Lorem ipsum dolor sit amet.</p>
+
+<b><p>Example: TreeSearch</p></b>
+<p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Maxime, perspiciatis labore animi sed pariatur magnam.</p>
+<p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Beatae quidem, vero hic id excepturi aut!lorem5
+<center><img src="https://www.cis.upenn.edu/~matuszek/cit594-2012/Pages/backtracking_files/treesearch.gif"></center>
+
+<p>Lorem ipsum dolor sit amet.</p>
+<p style="color:maroon; font-size:20px; margin:20px"></p>
+<p>
+    public class BinaryTree {<br>
+        BinaryTree leftChild = null;<br>
+        BinaryTree rightChild = null;<br>
+        boolean isGoalNode = false;<br>
+        String name;<br>
+        
+        BinaryTree(String name, BinaryTree left, BinaryTree right, boolean isGoalNode) {<br>
+            this.name = name;<br>
+            leftChild = left;<br>
+            rightChild = right;<br>
+            this.isGoalNode = isGoalNode;<br>
+        }<br>
+    }
+</p>
+<p>
+    Next we will create a TreeSearch class, and in it we will define a method makeTree() which constructs the above binary tree.
+</p>
+<p style="color:maroon; font-size:20px; margin:20px"></p>
+<p>
+    static BinaryTree makeTree() {<br>
+        BinaryTree root, a, b, c, d, e, f;<br>
+        c = new BinaryTree("C", null, null, false);<br>
+        d = new BinaryTree("D", null, null, false);<br>
+        e = new BinaryTree("E", null, null, true);<br>
+        f = new BinaryTree("F", null, null, false);<br>
+        a = new BinaryTree("A", c, d, false);<br>
+        b = new BinaryTree("B", e, f, false);<br>
+        root = new BinaryTree("Root", a, b, false);<br>
+        return root;<br>
+    }
+</p>
+<p>And finally, here's the recursive backtracking routine to "solve" the binary tree by finding a goal node.</p>
+<p style="color:maroon; font-size:20px; margin:20px">
+    static boolean solvable(BinaryTree node) { <br>
+       <span>> /* 1 */</span>  if (node == null) return false;<br>
+       <span class="one">/* 2 */</span>  if (node.isGoalNode) return true;<br>
+        <span class="one">/* 3 */ </span> if (solvable(node.leftChild)) return true;<br>
+     <span class="one">/* 4 */</span>  if (solvable(node.rightChild)) return true;<br>
+        <span class="one"> /* 5 */</span>  return false;<br>
+        }
+</p>
+<p>Here's what the numbered lines are doing:</p>
+<ol>
+<li>If we are given a null node, it's not solvable. This statement is so that we can call this method with the children of a node, without first checking whether those children actually exist.</li>
+   <li> If the node we are given is a goal node, return success.</li>
+    <li>See if the left child of node is solvable, and if so, conclude that node is solvable. We will only get to this line if node is non-null and is not a goal node, says to</li>
+    <li>Do the same thing for the right child.</li>
+    <li>Since neither child of node is solvable, node itself is not solvable.</li>
+</ol>
+<p>This program runs correctly and produces the unenlightening result true.</p>
+<p>Each time we ask for another node, we have to check if it is null. In the above we put that check as the first thing in solvable. An alternative would be to check first whether each child exists, and recur only if they do. Here's that alternative version:</p>
+<p style="color:maroon; font-size:20px; margin:20px">
+    static boolean solvable(BinaryTree node) {<br>
+        if (node.isGoalNode) return true;<br>
+        if (node.leftChild != null && solvable(node.leftChild)) return true;<br>        if (node.rightChild != null && solvable(node.rightChild)) return true;
+        return false;<br>
+    }
+</p>
+<p>I think the first version is simpler, but the second version is slightly more efficient.</p>
+<b><p>What are the children?</p></b>
+<p>One of the things that simplifies the above binary tree search is that, at each choice point, you can ignore all the previous choices. Previous choices don't give you any information about what you should do next; as far as you know, both the left and the right child are possible solutions. In many problems, however, you may be able to eliminate children immediately, without recursion.</p>
+<p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Nam sed praesentium quaerat unde nobis sint?</p>
+<p>Lorem, ipsum dolor sit amet consectetur adipisicing elit. Illo, necessitatibus!</p>
+
+<ul>
+<b><li>Method 1.</b> Lorem ipsum dolor sit amet consectetur adipisicing elit. Architecto, ipsam?
+<b><li>Method 2.</b> Lorem ipsum dolor sit amet consectetur adipisicing elit. Aliquam, repudiandae.</p>
+</ul>
+<p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Maxime accusamus minus placeat a unde sequi.</p>
+<p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Maxime, inventore. Voluptas maxime quae sunt ea tempora. Expedita possimus commodi nihil.</p>
+
+<p style="color:maroon; font-size:20px">boolean mapIsOK()</p>
+<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Deleniti, quae.</p>
+<p style="color:maroon; font-size:20px">boolean okToColor(int row, int column)</p>
+<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Deleniti, quae.</p>
+<p style="color:maroon; font-size:20px">int[] nextRowAndColumn(int row, int column)</p>
+<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Deleniti, quae.</p>
+
+<p>Lorem ipsum dolor sit amet consectetur, adipisicing elit. Inventore, labore vitae ipsum aspernatur cumque magni?</p>
+<center><table border="1" cellspacing="2" cellpadding="3">
+
+<tr>
+<td></td>
+<td style="background-color:darkgrey">2 by 3 map</td>
+<td style="background-color:darkgrey">3 by 3 map</td>
+<td style="background-color:darkgrey">3 by 4 map</td>
+</td>
+</tr>
+
+<tr>
+<td style="background-color:darkgrey">Method 1:</td>
+<td>60 ms.</td>
+<td>940 ms.</td>
+<td>60530 ms. (1 minute)</td>
+</tr>
+
+<tr>
+    <td style="background-color:darkgrey">Method 2:</td>
+    <td>0 ms.</td>
+    <td>0 ms.</td>
+    <td>0 ms.</td>
+    </tr>    
+
+</table>
+</center>
+
+<b><p>Debugging techniques</p></b>
+<p>Lorem, ipsum dolor sit amet consectetur adipisicing elit. Illo vero neque hic omnis nemo labore ut minima illum! Neque, dolorum.</p>
+<p><b>Trick#1: Indent when you print method entries and exits.</b>Lorem ipsum dolor sit amet consectetur, adipisicing elit. Ipsum sed nam harum quos impedit. Voluptas!</p>
+<p><b>Trick#2: Use specialized print methods for debugging.</b>Lorem ipsum dolor sit amet consectetur, adipisicing elit. Ipsum sed nam harum quos impedit. Voluptas!</p>
+<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Maxime cumque quidem similique voluptas. Ullam, ad.</p>
+<p>Lorem ipsum dolor, sit amet consectetur adipisicing elit. Sunt, architecto?</p>
+<p style="color:maroon; font-size:20px; margin:20px">
+    static String indent = "";
+<br>
+    static String name(BinaryTree node) {<br>
+        if (node == null) return null;<br>
+        else return node.name;<br>
+    }<br>
+    <br>
+    static void enter(BinaryTree node) {<br>
+        System.out.println(indent + "Entering solvable(" + name(node) + ")");
+        <br>     indent = indent + "|  ";<br>
+    }<br>
+    <br>
+    static boolean yes(BinaryTree node) {<br>
+        indent = indent.substring(3);<br>
+        System.out.println(indent + "solvable(" + name(node) + ") returns true");<br>
+        return true;<br>
+    }<br>
+    <br>
+    static boolean no(BinaryTree node) {<br>
+        indent = indent.substring(3);<br>
+        System.out.println(indent + "solvable(" + name(node) + ") returns false");<br>
+        return false;<br>
+    }<br>
+</p>
+<p>Lorem, ipsum dolor sit amet consectetur adipisicing elit. Iste, ex?</p>
+<p style="color:maroon; font-size:20px; margin:20px">
+    static boolean solvable(BinaryTree node) {
+   <br>     <b>enter(node);</b>
+        if (node == null) return <b>no(node)</b>;<br>
+        if (node.isGoalNode) return <b>yes(node)</b>;<br>
+        if (solvable(node.leftChild)) return <b>yes(node)</b>;<br>
+        if (solvable(node.rightChild)) return <b>yes(node)</b>;<br>
+        return <b>no(node)</b>;<br>
+    }
+</p>
+<p>And we get these results:</p>
+<b>
+<p style="margin:35px; font-size:20px">
+    Entering solvable(Root)<br>
+    | Entering solvable(A)<br>
+    |  |  Entering solvable(C)<br>
+    |  |  |  Entering solvable(null)<br>
+    |  |  |  solvable(null) returns false<br>
+    |  |  |  Entering solvable(null)<br>
+    |  |  |  solvable(null) returns false<br>
+    |  |  solvable(C) returns false<br>
+    |  |  Entering solvable(D)<br>
+    |  |  |  Entering solvable(null)<br>
+    |  |  |  solvable(null) returns false<br>
+    |  |  |  Entering solvable(null)<br>
+    |  |  |  solvable(null) returns false<br>
+    |  |  solvable(D) returns false<br>
+    |  solvable(A) returns false<br>
+    |  Entering solvable(B)<br>
+    |  |  Entering solvable(E)<br>
+    |  |  solvable(E) returns true<br>
+    |  solvable(B) returns true<br>
+    solvable(Root) returns true<br>
+    true
+</p>
+</b>
+<p><b>Trick#3: Never discard your debugging statements.</b>Lorem ipsum dolor sit amet consectetur, adipisicing elit. Ipsum sed nam harum quos impedit. Voluptas!</p>
+<p>Lorem ipsum dolor sit amet consectetur, adipisicing elit. Dolores reiciendis adipisci nihil ea perspiciatis expedita harum fuga cumque temporibus ad voluptate ab, magni sequi non quia, fugit, repudiandae earum. Qui.</p>
+<p>The simple solution is to make your debugging statements conditional. For example,</p>
+<p style="color:maroon; font-size:20px; margin:30px">
+<b>static final boolean debugging = false;</b><br><bR>
+static void enter(BinaryTree node) {<br>
+    <b>if (debugging) {</b><br>
+        System.out.println(indent + "Entering solvable(" + name(node) + ")");<br>
+        indent = indent + "|  ";<br>
+    }<br>
+}<br>
+
+static boolean yes(BinaryTree node) {<br>
+    <b>if (debugging) {</b><br>
+        indent = indent.substring(3);<br>
+        System.out.println(indent + "solvable(" + name(node) + ") returns true");<br>
+    }<br>
+    return true;<br>
+}<br>
+
+static boolean no(BinaryTree node) {<br>
+    <b>if (debugging) {</b><br>
+        indent = indent.substring(3);<br>
+        System.out.println(indent + "solvable(" + name(node) + ") returns false");<br>
+    }<br>
+    return false;<br>
+}
+</p>
+
+<p>In industry, actual programs often have multiple flags to control different aspects of debugging. Don't worry too much about making your code larger; modern compilers will notice that since the variable <a style="color:maroon; font-size:20px">debugging</a> is <a style="color:maroon; font-size:20px">final,</a> it can never be <a style="color:maroon; font-size:20px"> true</a>, and the controlled code will be discarded.</p>
+<p><b>Trick#4: Never discard your debugging statements.</b>Lorem ipsum dolor sit amet consectetur, adipisicing elit. Ipsum sed nam harum quos impedit. Voluptas!</p>
+<p style="color:maroon; font-size:20px; margin:30px">
+    new Exception("Checkpoint Charlie").printStackTrace(System.out);
+</p>
+<p>will print out a message something like this, and the program will then continue normally. That is, the above code just acts like a print statement.</p>
+<p style="color:maroon; font-size:20px; margin:30px">
+    java.lang.Exception: Checkpoint Charlie<br>
+    at TreeSearch.solvable(TreeSearch.java:53)<br>
+    at TreeSearch.solvable(TreeSearch.java:57)<br>
+    at TreeSearch.main(TreeSearch.java:72)<br>
+    at __SHELL38.run(__SHELL38.java:16)<br>
+    at bluej.runtime.ExecServer.suspendExecution(Unknown Source)<br>
+</p>
+<b><p>Example: Cindy's Puzzle</p></b>
+<p>I call the following puzzle "Cindy's puzzle" for historical reasons. You have some number n of black marbles and the same number of white marbles, and you have a playing board which consists simply of a line of 2n+1 spaces to put the marbles in. Start with the black marbles all at one end (say, the left), the white marbles all at the other end, and a free space in between.</p>
+<center><table border="1">
+<tr>
+<td style="background-color: darkgrey; border-color:black; border:1px"><img src="https://www.cis.upenn.edu/~matuszek/cit594-2012/Pages/backtracking_files/black-ball.gif"></td>
+<td style="background-color: darkgrey;border-color:black; border:1px"><img src="https://www.cis.upenn.edu/~matuszek/cit594-2012/Pages/backtracking_files/black-ball.gif"></td>
+<td style="width:40px; background-color: darkgrey;border-color:black; border:1px"></td>
+<td style="background-color: darkgrey;border-color:black; border:1px"><img src="https://www.cis.upenn.edu/~matuszek/cit594-2012/Pages/backtracking_files/white-ball.gif"></td>
+<td style="background-color: darkgrey;border-color:black; border:1px"><img src="https://www.cis.upenn.edu/~matuszek/cit594-2012/Pages/backtracking_files/white-ball.gif"></td>
+</tr>
+</table>
+</center>
+<p>The goal is to reverse the positions of the marbles:</p>
+<center><table border="1">
+<tr>
+    <td style="background-color: darkgrey;border-color:black; border:1px"><img src="https://www.cis.upenn.edu/~matuszek/cit594-2012/Pages/backtracking_files/white-ball.gif"></td>
+    <td style="background-color: darkgrey;border-color:black; border:1px"><img src="https://www.cis.upenn.edu/~matuszek/cit594-2012/Pages/backtracking_files/white-ball.gif"></td>
+    <td style="width:40px; background-color: darkgrey;border-color:black; border:1px"></td>
+    <td style="background-color: darkgrey;border-color:black; border:1px"><img src="https://www.cis.upenn.edu/~matuszek/cit594-2012/Pages/backtracking_files/black-ball.gif"></td>
+    <td style="background-color: darkgrey;border-color:black; border:1px"><img src="https://www.cis.upenn.edu/~matuszek/cit594-2012/Pages/backtracking_files/black-ball.gif"></td>
+</tr>
+</table>
+</center>
+
+<p>The black marbles can only move to the right, and the white marbles can only move to the left (no backing up). At each move, a marble can either:</p>
+<ul>
+<li>Move one space ahead, if that space is clear, or</li>
+<li>Jump ahead over exactly one marble of the opposite color, if the space just beyond that marble is clear.</li>
+</ul>
+<p>For example, you could make the following sequence of moves:</p>
+<p>
+
+<b style="margin-left:300px">Starting position:</b>
+<center><table border="1">
+<tr>
+<td style="background-color: darkgrey;border-color:black; border:1px"><img src="https://www.cis.upenn.edu/~matuszek/cit594-2012/Pages/backtracking_files/black-ball.gif"></td>
+<td style="background-color: darkgrey;border-color:black; border:1px"><img src="https://www.cis.upenn.edu/~matuszek/cit594-2012/Pages/backtracking_files/black-ball.gif"></td>
+<td style="width:40px; background-color:darkgrey;border-color:black; border:1px"></td>
+<td style="background-color: darkgrey;border-color:black; border:1px"><img src="https://www.cis.upenn.edu/~matuszek/cit594-2012/Pages/backtracking_files/white-ball.gif"></td>
+<td style="background-color: darkgrey;border-color:black; border:1px"><img src="https://www.cis.upenn.edu/~matuszek/cit594-2012/Pages/backtracking_files/white-ball.gif"></td>
+</tr>
+</table>
+</center>
+</p>
+<p><b style="margin-left:300px">Black moves ahead:</b>
+<center><table border="2">
+    <tr>
+    <td style="background-color: darkgrey;border-color:black; border:1px"><img src="https://www.cis.upenn.edu/~matuszek/cit594-2012/Pages/backtracking_files/black-ball.gif"></td>
+    <td style="width:40px; background-color: darkgrey;border-color:black; border:1px"></td>
+    <td style="width:40px; background-color: darkgrey;border-color:black; border:1px"><img src="https://www.cis.upenn.edu/~matuszek/cit594-2012/Pages/backtracking_files/black-ball.gif"></td>
+    <td style="background-color: darkgrey;border-color:black; border:1px"><img src="https://www.cis.upenn.edu/~matuszek/cit594-2012/Pages/backtracking_files/white-ball.gif"></td>
+    <td style="background-color: rgb(148, 115, 115);border-color:black; border:1px"><img src="https://www.cis.upenn.edu/~matuszek/cit594-2012/Pages/backtracking_files/white-ball.gif"></td>
+</tr>
+</table>
+</center>
+</p>
+<p><b style="margin-left:300px">White jumps:</b>
+<center>
+    <table border="1">
+    <tr>
+    <td style="background-color: darkgrey;border-color:black; border:1px"><img src="https://www.cis.upenn.edu/~matuszek/cit594-2012/Pages/backtracking_files/black-ball.gif"></td>
+    <td style="background-color: darkgrey;border-color:black; border:1px"><img src="https://www.cis.upenn.edu/~matuszek/cit594-2012/Pages/backtracking_files/white-ball.gif"></td>
+    <td style="background-color: darkgrey;border-color:black; border:1px"><img src="https://www.cis.upenn.edu/~matuszek/cit594-2012/Pages/backtracking_files/black-ball.gif"></td>
+    <td style="width:40px; background-color: darkgrey;border-color:black; border:1px"></td>
+    <td style="background-color: darkgrey;border-color:black; border:1px"><img src="https://www.cis.upenn.edu/~matuszek/cit594-2012/Pages/backtracking_files/white-ball.gif"></td>
+</p>
+</tr>
+</table>
+</center>
+<p><b style="margin-left:300px">Black moves ahead:</b></p>
+<center>
+<table border="1">
+    <tr>
+    <td style="background-color: darkgrey;border-color:black; border:1px"><img src="https://www.cis.upenn.edu/~matuszek/cit594-2012/Pages/backtracking_files/black-ball.gif"></td>
+    <td style="background-color: darkgrey;border-color:black; border:1px"><img src="https://www.cis.upenn.edu/~matuszek/cit594-2012/Pages/backtracking_files/white-ball.gif"></td>
+    <td style="width:40px; background-color: darkgrey; border-color:black; border:1px"></td>
+    <td style="background-color: darkgrey; border-color:black; border:1px"><img src="https://www.cis.upenn.edu/~matuszek/cit594-2012/Pages/backtracking_files/black-ball.gif"></td>
+    <td style="background-color:darkgrey; border-color:black; border:1px"><img src="https://www.cis.upenn.edu/~matuszek/cit594-2012/Pages/backtracking_files/black-ball.gif"></td>
+    </tr>
+    </table>
+</center>
+<p>
+<b style="margin-left:300px">Black jumps:</b>
+<center><table border="1">
+    <tr>
+    <td style="width:40px; background-color: darkgrey;border-color:black; border:1px"></td>
+    <td style="background-color: darkgrey;border-color:black; border:1px"><img src="https://www.cis.upenn.edu/~matuszek/cit594-2012/Pages/backtracking_files/white-ball.gif"></td>      
+    <td style="background-color: darkgrey;"><img src="https://www.cis.upenn.edu/~matuszek/cit594-2012/Pages/backtracking_files/black-ball.gif"></td>
+    <td style="background-color: darkgrey;border-color:black; border:1px"><img src="https://www.cis.upenn.edu/~matuszek/cit594-2012/Pages/backtracking_files/white-ball.gif"></td>
+    <td style="background-color: darkgrey;border-color:black; border:1px"><img src="https://www.cis.upenn.edu/~matuszek/cit594-2012/Pages/backtracking_files/white-ball.gif"></td>
+</tr>
+</table>
+</center>
+</p>
+
+<p style="margin-left:300px"><b>White moves ahead:</b>
+   <center> <table border="1">
+        <tr>
+        <td style="width:40px; background-color: darkgrey;border-color:black; border:1px"></td>
+        <td style="background-color: darkgrey;border-color:black; border:1px"><img src="https://www.cis.upenn.edu/~matuszek/cit594-2012/Pages/backtracking_files/white-ball.gif"></td>        <td style="background-color: darkgrey;"><img src="https://www.cis.upenn.edu/~matuszek/cit594-2012/Pages/backtracking_files/black-ball.gif"></td>
+        <td style="background-color: darkgrey;border-color:black; border:1px"><img src="https://www.cis.upenn.edu/~matuszek/cit594-2012/Pages/backtracking_files/white-ball.gif"></td>
+        <td style="background-color: darkgrey;border-color:black; border:1px"><img src="https://www.cis.upenn.edu/~matuszek/cit594-2012/Pages/backtracking_files/white-ball.gif"></td>
+    </tr>
+    </table>
+    </center>
+    </p>
+    <b><p style="margin-left:300px">Stuck!</p></b>
+<p>Now to the program. The main program will initialize the board, and call a recursive backtracking routine to attempt to solve the puzzle. The backtracking routine will either succeed and print out a winning path, or it will fail, and the main program will have to print out the bad news.</p>
+<p>The backtracking method is named solvable and returns a boolean. In solvable we shall need to check whether we are at a leaf, which in this case means a position from which no further moves are possible. This isn't so easy.</p>
+<p>Each possible move will result in a new board position, and these new board positions are the children of the current board position. Hence to find the children of a node (that is, of a board position), we need only find the possible moves from that node. Remember that it is also highly desirable to find an ordering on these possible moves.</p>
+<p>Here it is time to stop and take thought. To make progress, we must analyze the game to some extent. Probably a number of approaches would work, and what follows is based on the way I worked it out. If you were to program this puzzle, you might find a different but equally valid approach.</p>
+<p>First, notice that if a marble has a move, that move is unique: if it can move ahead one square, then it cannot jump. If it can jump, it cannot move ahead one square. This suggests that, to find the possible moves, we might assign numbers to the marbles, and check each marble in turn. When we have looked at all the marbles, we have looked at all the possible moves. This would require having a table to keep track of where each marble is, or else somehow "marking" each marble with its number and searching the board each time to find the marble we want. Neither alternative is very attractive.</p>
+<p>Next, notice that for a given board position, each marble occupies a unique space. Hence, instead of talking about moving a particular marble, we can talk about moving the marble in a particular space. If a move is possible from a given space, then that must be the only move possible from that space, because if the marble in that space has a move, it is unique. There is a slight complication because not every space contains a marble, but at least the spaces (unlike the marbles) stay in one place.</p>
+<p>Now we have a simpler ordering of moves to use in our program. Just check, in order, the <a style="color:maroon; font-size:20px">2n+1</a> spaces of the board. For each space, either zero or one moves is possible. With this understanding, we can write a boolean method <a style="color:maroon; font-size:20px">canMove(int[] board, int position)</a> which determines whether a move is possible from the given position:</p>
+<ul>
+<lI>If the position is empty, no move is possible;</lI>
+   <li> If the position contains a black marble, the method checks for a move or jump to the right;</lI>
+   <li> If the position contains a white marble, the method checks for a move or jump to the left.</lI>
+</ul>
+<p>We write another method <a style="color:maroon; font-size:20px">[] makeMove(int[] oldBoard, int position)</a> that will take a board and a position, make a move from that position, and return as its value a new board. (We could write this somewhat more efficiently by changing the old board, rather than creating a new one, but here we are more concerned with simplicity.) In technical jargon, <a style="color:maroon; font-size:20px">makeMove</a> is "applicative" rather than "mutative."</p>
+<p>With these methods, our central backtracking method can be written as follows:</p>
+<p style="color:maroon; font-size:20px; margin:30px">
+    boolean solvable(int[] board) {<br>
+        if (puzzleSolved(board)) {<br>
+            return true;<br>
+        }<br>
+        for (int position = 0; position < BOARD_SIZE; position++) {<br>
+            if (canMove(board, position)) {<br>
+                int[] newBoard = makeMove(board, position);<br>
+                if (solvable(newBoard)) {<br>
+                    printBoard(newBoard);<br>
+                    return true;<br>
+                }<br>
+            }<br>
+        }<br>
+        return false;<br>
+    }
+</p>
+<p>Along with canMove and makeMove, we are using methods puzzleSolved and printBoard with meanings that should be obvious.</p>
+<p>Here is some output from the program:</p>
+<b><ol>
+
+    <a style="color:blue">16.</a> <a style="word-spacing:5px; font-family:sans-serif">WHITE  WHITE  WHITE  _____  BLACK  BLACK  BLACK</a><br>
+    <a style="color:blue">15.</a><a style="word-spacing:5px;font-family:sans-serif"> WHITE  WHITE  WHITE  BLACK  _____  BLACK  BLACK</a><br>
+    <a style="color:blue">14.</a><a style="word-spacing:5px;font-family:sans-serif">WHITE  WHITE  _____  BLACK  WHITE  BLACK  BLACK</a><br>
+    <a style="color:blue">13.</a><a style="word-spacing:5px;font-family:sans-serif">WHITE  _____  WHITE  BLACK  WHITE  BLACK  BLACK</a><br>
+    <a style="color:blue">12.</a> <a style="word-spacing:5px;font-family:sans-serif">WHITE  BLACK  WHITE  _____  WHITE  BLACK  BLACK</a><br>
+    <a style="color:blue">11.</a><a style="word-spacing:5px;font-family:sans-serif">WHITE  BLACK  WHITE  BLACK  WHITE  _____  BLACK</a><br>
+    <a style="color:blue">10.</a><a style="word-spacing:5px;font-family:sans-serif">WHITE  BLACK  WHITE  BLACK  WHITE  BLACK  _____</a><br>
+    <a style="color:blue">9.</a><a style="word-spacing:5px;font-family:sans-serif">WHITE  BLACK  WHITE  BLACK  _____  BLACK  WHITE</a><br>
+    <a style="color:blue">8.</a><a style="word-spacing:5px;font-family:sans-serif">WHITE  BLACK  _____  BLACK  WHITE  BLACK  WHITE</a><br>
+    <a style="color:blue">7.</a><a style="word-spacing:5px;font-family:sans-serif"> _____  BLACK  WHITE  BLACK  WHITE  BLACK  WHITE</a><br>
+    <a style="color:blue">6.</a><a style="word-spacing:5px;font-family:sans-serif">BLACK  _____  WHITE  BLACK  WHITE  BLACK  WHITE</a><br>
+    <a style="color:blue">5.</a><a style="word-spacing:5px;font-family:sans-serif">BLACK  BLACK  WHITE  _____  WHITE  BLACK  WHITE</a><br>
+    <a style="color:blue">4.</a><a style="word-spacing:5px;font-family:sans-serif">BLACK  BLACK  WHITE  BLACK  WHITE  _____  WHITE</a><br>
+    <a style="color:blue">3.</a><a style="word-spacing:5px;font-family:sans-serif"> BLACK  BLACK  WHITE  BLACK  _____  WHITE  WHITE</a><br>
+    <a style="color:blue">2.</a><a style="word-spacing:5px;font-family:sans-serif">BLACK  BLACK  _____  BLACK  WHITE  WHITE  WHITE</a><br>
+    <a style="color:blue">1.</a><a style="word-spacing:5px;font-family:sans-serif">BLACK  BLACK  BLACK  _____  WHITE  WHITE  WHITE</a><br>
+</ol>
+</b>
+<p>Notice that the solution is given in reverse order: BLACK starts out on the left and WHITE on the right, as in the last line. I've added line numbers to the actual output in order to emphasize this point. Backtracking always produces its results (sequence of choices) in reverse order; it is up to you, the programmer, to reverse the results again to get them in the correct order.</p>
+</body>
+</html>
